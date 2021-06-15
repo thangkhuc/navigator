@@ -1,0 +1,44 @@
+0
+1;52.517037;13.38886;Berlin;23;Berlin;10969;Neuenburger Strasse
+0
+2;52.400931;13.05914;Potsdam;13;Brandenburg;14482;Wollestrasse
+0
+3;52.131589;11.639961;Magdeburg;34;Sachen-Anhalt;39112;Ackerstrasse
+0
+4;51.049329;13.738144;Dresden;35;Sachsen;10067;Ammonstrasse
+0
+5;53.62883;11.414804;Schwerin;7;Mecklenburg-Vorpommern;19061;Wilhelm-Hennemann-Strasse
+0
+6;53.550099;9.989787;Harmburg;7;Harmburg;20457;Koreastrasse
+0
+7;54.322709;10.135555;Kiel;3;Schleswig-Holstein;24145;Fahrenkuhl
+0
+8;52.374478;9.738553;Hannover;3;Niedersachsen;30625;Am Inselgraben
+0
+9;53.07582;8.807165;Bremen;12;Bremen;28197;Stromer Landstrasse
+0
+10;50.977797;11.028736;Erfurt;40;Thueringen;99085;Schlachthofstrasse
+0
+11;51.225402;6.776314;Duesseldorf;21;Nordhein-Westfalen;40217;Florastrasse
+0
+12;50.082038;8.241656;Wiesbaden;3;Hessen;65189;Bahnhofsplatz
+0
+13;50.001231;8.276251;Mainz;14;Rheinland-Pfalz;55122;Binger Strasse
+0
+14;49.234362;6.996379;Saarbruecken;22;Saarland;66119;Stadtautobahn
+0
+15;48.778449;9.180013;Stuttgart;17;Baden-Wuettermberg;70173;Charlottenplatz
+0
+16;48.137108;11.575382;Muenchen;15;Bayern;80331;Sonnenstrasse
+1
+17;47.557561;10.749732;Neuschwanstein;Schloss;4
+1
+18;49.866498;8.639005;hda;Hochschule;3
+1
+19;50.108969;8.7031;EZB;Europaeische Zentralbank;4
+1
+20;50.765041;6.079392;FhAachen;Hochschule;5
+1
+21;50.941304;6.958138;Koelnerdom;Dom;6
+0
+22;51.7567447;14.3357307;Cottbus;71;Brandenburg;30050;Parzellenstraße
