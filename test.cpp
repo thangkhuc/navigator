@@ -20,5 +20,5 @@ void Test :: Mainz_Wiesbaden()
 
 void Test :: Schwerin_Berlin()
 {
-    QCOMPARE(t->getNavidaten()[4]->entfernung(t->getNavidaten()[0]), 182.35); //Test für München [4] und Kiel [0]
+    QCOMPARE(t->getNavidaten()[4]->entfernung(t->getNavidaten()[0]), 182.35); //Test für Schwerin[4] und Berlin[0]
 }

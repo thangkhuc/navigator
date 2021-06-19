@@ -12,6 +12,13 @@ Navigation::Navigation(QWidget *parent)
     connect(ui->routing_button, &QPushButton::clicked, this, &Navigation::routing);
 
     karte_importieren();
+    graph = new Graph(vector<Ort*> (navidaten.begin(), navidaten.end()));
+    routingInfo_importieren();
+
+    graph->initializeRoutingsTable();
+    // calculate routing table for all vertices in graph
+    for (unsigned i = 0; i < graph->getVertices().size(); i++)
+        graph->dijkstra(graph->getVertices()[i]);
 
     radioButtonList = findChildren<QRadioButton*> ();
     for (int i = 0; i < radioButtonList.size(); i++) {
@@ -30,22 +37,6 @@ Navigation::Navigation(QWidget *parent)
     //Initialisierung des Buffers mit Größr und Farbe ist nötig
     buffer = new QPixmap(this->width(),this->height()); // pass die Größe mit der Größe des Widgets an
     buffer->fill(Qt::white); // set the background color für das buffer Widget
-
-    //Initialisierung Routingstabelle aller Knoten
-    updateRoutingstabelle();
-}
-
-void Navigation :: updateRoutingstabelle()
-{
-    for (int i = 0; i < navidaten.size(); i++) {
-        navidaten[i]->setRoutingstabelle(std::vector<Ort*>(navidaten.begin(), navidaten.end()));
-
-        try {
-            navidaten[i]->dijkstra();
-        }  catch (length_error e) {
-            e.what();
-        }
-    }
 }
 
 void Navigation :: paint(const QAbstractButton& button1, const QAbstractButton& button2)
@@ -76,23 +67,24 @@ void Navigation :: paintEvent(QPaintEvent*)
     newLine.drawPixmap(0, 0, *buffer); // aktualisiert das mainWindow anhand des buffer
 }
 
-void Navigation :: paintRouting(Netzknote* quelle, Netzknote* ziel)
+void Navigation :: paintRouting(Vertex* source, RouteInfor* route)
 {
-    if (!ziel->getVorneKnote())
-        throw std::runtime_error("paintRouing() Quelleknote uns Zielknote sind getauscht");
-    else {
-        Netzknote* speicher = ziel;
+        RouteInfor* tmp = route;
         do {
-            QAbstractButton* quelleButton = radioButtonGroup.button(ziel->getVorneKnote()->getKnote()->getID());
-            QAbstractButton* zielButton = radioButtonGroup.button(ziel->getKnote()->getID());
-            paint(*quelleButton, *zielButton);
+            QAbstractButton* sourceButton;
+            if (route->getPredecessor() == nullptr)
+                sourceButton = radioButtonGroup.button(source->getPlace()->getID());
+            else
+                sourceButton = radioButtonGroup.button(route->getPredecessor()->getDestination()->getPlace()->getID());
 
-            ziel = ziel->getVorneKnote();
-        } while (ziel->getKnote()->getID() != quelle->getKnote()->getID());
+            QAbstractButton* destinationButton = radioButtonGroup.button(route->getDestination()->getPlace()->getID());
+            paint(*sourceButton, *destinationButton);
 
-        Anzeige_Dialog anzeige(quelle, speicher);
+            route = route->getPredecessor();
+        } while (route != nullptr);
+
+        Anzeige_Dialog anzeige(source, tmp);
         anzeige.exec();
-    }
 }
 
 Navigation::~Navigation()
@@ -100,6 +92,9 @@ Navigation::~Navigation()
     delete ui;
     for (int i = 0; i < navidaten.size(); i++)
         delete navidaten[i];
+
+    for (unsigned i = 0; i < graph->getVertices().size(); i++)
+        graph->getVertices()[i]->deleteVertex();
 }
 
 void Navigation::entfernung()
@@ -133,25 +128,26 @@ void Navigation :: routing()
     if (aktiv_radioButton(aktivButtonArray) != 2)
         meldung("Es muss zwei Orte gewählt werden");
     else {
-        Ort* quelle = this->getOrt(aktivButtonArray[0]);
-        Netzknote* quelleButton = quelle->getNetzknote(aktivButtonArray[0]);
-        Netzknote* zielButton = quelle->getNetzknote(aktivButtonArray[1]);
+        Vertex* source = graph->getVertex(aktivButtonArray[0]);
+        Vertex* destination = source->getVertex(aktivButtonArray[1]);
 
-        paintRouting(quelleButton, zielButton);
+        RouteInfor* route = source->getRouteInfor(destination);
+        paintRouting(source, route);
     }
     paint();
 }
 
 void Navigation::alleOrte()
 {
-    for (int i = 0; i < navidaten.size(); i++) {
+    for (unsigned i = 0; i < graph->getVertices().size(); i++) {
         QAbstractButton* stammOrt = radioButtonGroup.button(navidaten[i]->getID());
 
-        for (unsigned j = 0; j < navidaten[i]->getNachbar().size(); j++)
-            paint(*stammOrt, *radioButtonGroup.button(navidaten[i]->getNachbar()[j]->getKnote()->getID()));
+        for (unsigned j = 0; j < graph->getVertices()[i]->getNeighbors().size(); j++)
+            paint(*stammOrt, *radioButtonGroup.button(graph->getVertices()[i]->getNeighbors()[j]->getPlace()->getID()));
     }
 
-    Anzeige_Dialog anzeige(navidaten);
+
+    Anzeige_Dialog anzeige(graph->getVertices());
     anzeige.exec();
 
     paint(); //reset QWidget
@@ -162,23 +158,26 @@ void Navigation::information()
     vector<int> aktivButtonArray;
     aktiv_radioButton(aktivButtonArray);
 
-    // fuegt alle ausgewaehlte Orte in vector orts hinzu
-    QVector<Ort*> orts;
+    // add all selected places in vector verticies
+    vector<Vertex*> verticies;
     for (unsigned i = 0; i < aktivButtonArray.size(); i++) {
-        for (int j = 0; j < navidaten.size(); j++) {
-            if (aktivButtonArray[i] == (int) navidaten[j]->getID())
-                orts.push_back(navidaten[j]);
+        for (unsigned j = 0; j < graph->getVertices().size(); j++) {
+            if (aktivButtonArray[i] == (int) graph->getVertices()[j]->getPlace()->getID())
+                verticies.push_back(graph->getVertices()[j]);
         }
     }
 
-    if (orts.size() == 1) {
-        for (unsigned i = 0; i < orts[0]->getNachbar().size(); i++) {
-            QAbstractButton* stammOrt = radioButtonGroup.button(orts[0]->getID());
-            paint(*stammOrt, *radioButtonGroup.button(orts[0]->getNachbar()[i]->getKnote()->getID()));
+    if (verticies.size() == 1) {
+        for (unsigned i = 0; i < verticies[0]->getNeighbors().size(); i++) {
+            QAbstractButton* stammOrt = radioButtonGroup.button(verticies[0]->getPlace()->getID());
+            QAbstractButton* zielOrt = radioButtonGroup.button(verticies[0]->getNeighbors()[i]->getPlace()->getID());
+
+            paint(*stammOrt, *zielOrt);
         }
     }
 
-    Anzeige_Dialog anzeige(orts);
+    Anzeige_Dialog anzeige(verticies);
+
     anzeige.exec();
 
     paint();
@@ -321,32 +320,37 @@ void Navigation :: karte_importieren()
                 this->navidaten.push_back(new PoI(kategorie, bemerkung, name, laengGrad, breiteGrad, ID));
         }
     }
+}
 
+void Navigation::routingInfo_importieren()
+{
     //Lade Routing Informationen nämlich Nachbare
     ifstream routingFile("../navigation/RoutingFile.txt");
-    int knoteID;
+    int nodeID;
     string line;
 
     if (!routingFile.is_open())
-        throw runtime_error("line 332 (navigation.cpp): routing file is not found");
+        throw underflow_error("line 332 (navigation.cpp): routing file is not found");
+    else if (graph->getVertices().size() == 0)
+        throw underflow_error("line 339 (navigation.cpp): graph has no vertex, graph should be initialized before call this function");
     else {
-        while (routingFile >> knoteID) {
-            vector<int> nachbarID; // speichert ID der Nachbare
+        while (routingFile >> nodeID) {
+            vector<int> neighborID; // speichert ID der Nachbare
             getline(routingFile, line);
             getline(routingFile, line);
 
             int number = 0;
             for (unsigned i = 0; i <= line.size(); i++) {
                 if (i == line.size() || line.at(i) == ';') {
-                    nachbarID.push_back(number);
+                    neighborID.push_back(number);
                     number = 0;
                 }
                 else
                     number = number * 10 + line.at(i) - '0';
             }
 
-            for (unsigned i = 0; i < nachbarID.size(); i++)
-                navidaten[knoteID - 1]->addNachbar(navidaten[nachbarID[i] - 1]);
+            for (unsigned i = 0; i < neighborID.size(); i++)
+                graph->getVertex(nodeID)->addNeighbor(graph->getVertex(neighborID[i]));
         }
     }
 }

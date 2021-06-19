@@ -11,21 +11,25 @@ CONFIG += c++11
 SOURCES += \
     adress.cpp \
     anzeige_dialog.cpp \
+    graph.cpp \
     main.cpp \
     navigation.cpp \
-    netzknote.cpp \
     ort.cpp \
     poi.cpp \
-    test.cpp
+    routeinfor.cpp \
+    test.cpp \
+    vertex.cpp
 
 HEADERS += \
     adress.h \
     anzeige_dialog.h \
+    graph.h \
     navigation.h \
-    netzknote.h \
     ort.h \
     poi.h \
-    test.h
+    routeinfor.h \
+    test.h \
+    vertex.h
 
 FORMS += \
     anzeige_dialog.ui \
