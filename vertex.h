@@ -14,13 +14,14 @@ public:
     Vertex(Ort*);
 
     // get route information to this vertex
-    // return null if there is no route to this destination
+    // return null if there is no route for this destination
     RouteInfor* getRouteInfor(Vertex*) const;
 
     void deleteVertex(); //for destructor
     bool checkNeighbor(Vertex*) const;
     void addNeighbor(Vertex*);
     void addRoute(RouteInfor*);
+    void popRoute(); // delete the top route in routing table
 
     vector<RouteInfor*> getRoutingTable() const;
     vector<Vertex*>     getNeighbors() const;

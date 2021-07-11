@@ -47,6 +47,8 @@ void Vertex::addRoute(RouteInfor* newRoute) {this->routingsTable.push_back(newRo
 
 vector<RouteInfor*> Vertex::getRoutingTable() const {return this->routingsTable;}
 
+void Vertex::popRoute() {this->routingsTable.pop_back();}
+
 RouteInfor* Vertex::getRouteInfor(Vertex* vertex) const
 {
     for (unsigned i = 0; i < this->routingsTable.size(); i++) {

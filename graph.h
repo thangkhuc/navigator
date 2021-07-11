@@ -10,8 +10,9 @@ public:
     Graph(vector<Ort*>);
     ~Graph();
 
-    //initialize the routing table of the vertex with all nodes in graph
+    //initialize the routing table of all vertices with all nodes in graph
     void initializeRoutingsTable();
+    void initializeRoutingsTable(Vertex*);
 
     // create routing table with dijkstra algorithm
     // Notation:
@@ -29,6 +30,7 @@ public:
 
     vector<Vertex*> getVertices() const;
     Vertex* getVertex(unsigned id) const;
+    void addVertex(Vertex*);
 };
 
 #endif // GRAPH_H
